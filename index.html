@@ -166,6 +166,9 @@
   .foot-links a:hover{border-color:var(--red)}
 
   .schema-desc{color:var(--muted);font-size:15px;margin:0 0 18px}
+  .schema-block{margin:34px 0 40px;padding-top:26px;border-top:1px solid var(--line);scroll-margin-top:80px}
+  .schema-block:first-of-type{border-top:none;padding-top:6px}
+  .schema-h{font-size:19px;font-weight:700;color:var(--white);margin:0 0 6px;letter-spacing:.3px}
   .schema-view{background:#000;border:1px solid var(--line);border-radius:8px;padding:10px;overflow:auto}
   .schema-view img{display:block;width:100%;height:auto;border-radius:4px}
   .schema-actions{margin:16px 0 8px}
@@ -326,29 +329,36 @@ function openSchemas(id){
   document.getElementById('tab-basico').classList.remove('active');
   document.getElementById('tab-avanzado').classList.remove('active');
   document.getElementById('tab-esquemas').classList.add('active');
-  state.schema = id ? SCHEMAS.find(s=>s.id===id) : SCHEMAS[0];
   renderSchemasSidebar();renderSchema();
   document.body.classList.remove('nav-open');
+  if(id){setTimeout(()=>gotoSchema(id),60);}else{window.scrollTo(0,0);}
 }
 function renderSchemasSidebar(){
   let h=`<div class="progress-wrap"><div class="plabel"><span>Esquemas</span><span>${SCHEMAS.length}</span></div></div>
   <div class="module"><div class="module-head"><span class="mnum">◈</span>Esquemas de conexión</div>`;
   SCHEMAS.forEach(s=>{
-    const ac=(state.schema&&state.schema.id===s.id)?'active':'';
-    h+=`<div class="lesson ${ac}" onclick="openSchema('${s.id}')"><span class="tick">▸</span><span>${s.title}</span></div>`;
+    h+=`<div class="lesson" onclick="gotoSchema('${s.id}')"><span class="tick">▸</span><span>${s.title}</span></div>`;
   });
   h+=`</div>`;
   document.getElementById('sidebar').innerHTML=h;
 }
-function openSchema(id){state.schema=SCHEMAS.find(s=>s.id===id);renderSchemasSidebar();renderSchema();document.body.classList.remove('nav-open');}
+function gotoSchema(id){
+  document.body.classList.remove('nav-open');
+  const el=document.getElementById('schema-'+id);
+  if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+}
 function renderSchema(){
-  const s=state.schema;
-  const h=`<div class="eyebrow"><span class="slash">///</span>Esquema de conexión</div>
-    <h1 class="lesson-title">${s.title}</h1>
-    <p class="schema-desc">${s.desc}</p>
-    <div class="schema-view"><img src="${s.file}" alt="${s.title}" loading="lazy"></div>
-    <div class="schema-actions"><a class="btn" href="${s.file}" target="_blank" rel="noopener">Abrir a pantalla completa ⤢</a></div>
-    <p class="schema-note">En el celular, tocá "Abrir a pantalla completa" y hacé zoom para ver los pines con detalle.</p>`;
+  let h=`<div class="eyebrow"><span class="slash">///</span>Esquemas de conexión</div>
+    <h1 class="lesson-title">Esquemas de conexión</h1>
+    <p class="schema-desc">Diagramas de cableado para tu ECU BDV. Tocá "Abrir a pantalla completa" y hacé zoom para ver los pines con detalle.</p>`;
+  SCHEMAS.forEach(s=>{
+    h+=`<div class="schema-block" id="schema-${s.id}">
+      <h2 class="schema-h">${s.title}</h2>
+      <p class="schema-desc">${s.desc}</p>
+      <div class="schema-view"><img src="${s.file}" alt="${s.title}" loading="lazy"></div>
+      <div class="schema-actions"><a class="btn" href="${s.file}" target="_blank" rel="noopener">Abrir a pantalla completa ⤢</a></div>
+    </div>`;
+  });
   const m=document.getElementById('main');m.classList.remove('home');m.innerHTML=h;m.scrollTop=0;window.scrollTo(0,0);
 }
 function openLesson(id){const l=allLessons(state.course).find(x=>x.id===id);if(!l)return;state.lesson=l;renderSidebar();renderLesson();document.body.classList.remove('nav-open');}
